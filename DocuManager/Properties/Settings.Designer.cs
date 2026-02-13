@@ -22,5 +22,17 @@ namespace DocuManager.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SkipRemove {
+            get {
+                return ((bool)(this["SkipRemove"]));
+            }
+            set {
+                this["SkipRemove"] = value;
+            }
+        }
     }
 }

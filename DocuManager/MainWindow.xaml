@@ -93,44 +93,75 @@
         </Style>
     </Window.Resources>
 
-    <Grid AllowDrop="True" Drop="Panel_Drop" Margin="20">
-        <!-- Container Card -->
-        <Border Background="#f5f5f5" CornerRadius="10"  BorderBrush="#ddd" BorderThickness="1">
-            <Grid>
-                <!-- ListView -->
-                <ListView x:Name="ItemsList"
-                          VerticalAlignment="Top"
+    <Grid Margin="20">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0"
+          AllowDrop="True"
+          Drop="Panel_Drop"
+          Margin="0,0,0,10">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="8*"/>
+                <ColumnDefinition Width="207*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Background="#f5f5f5"
+                CornerRadius="10"
+                BorderBrush="#ddd"
+                BorderThickness="1"
+                Grid.ColumnSpan="2">
+
+                <Grid>
+                    <ListView x:Name="ItemsList"
                           FontSize="14"
                           BorderThickness="0"
-                          Background="#fbfbfb">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="200"/>
-                            <GridViewColumn Header="Characters" DisplayMemberBinding="{Binding Characters}" Width="100"/>
-                            <GridViewColumn Header="Words" DisplayMemberBinding="{Binding Words}" Width="100"/>
-                            <GridViewColumn Header="Paragraphs" DisplayMemberBinding="{Binding Paragraphs}" Width="100"/>
-                            <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}" Width="80"/>
-                            <GridViewColumn Width="80">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button Content="Delete"
-                                                Click="Delete_Click"
+                          Background="#fbfbfb"
+                          GridViewColumnHeader.Click="GridViewColumnHeader_Click"
+                          AllowDrop="True"
+                          PreviewMouseLeftButtonDown="ItemsList_PreviewMouseLeftButtonDown"
+                          MouseMove="ItemsList_MouseMove"
+                          Drop="ItemsList_Drop">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="200"/>
+                                <GridViewColumn Header="Characters" DisplayMemberBinding="{Binding Characters}" Width="100"/>
+                                <GridViewColumn Header="Words" DisplayMemberBinding="{Binding Words}" Width="100"/>
+                                <GridViewColumn Header="Paragraphs" DisplayMemberBinding="{Binding Paragraphs}" Width="100"/>
+                                <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}" Width="80"/>
+                                <GridViewColumn Width="80">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Remove"
+                                                Click="Remove_Click"
                                                 Tag="{Binding Id}"
                                                 Style="{StaticResource DeleteButtonStyle}"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
 
-                <!-- Drop Hint Label -->
-                <Label x:Name="HintLabel"
+                    <Label x:Name="HintLabel"
                        Content="📂 Drop files here to import"
                        Style="{StaticResource HintLabelStyle}"
                        Visibility="Hidden"
                        IsHitTestVisible="False"/>
-            </Grid>
-        </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- BOTTOM-RIGHT BUTTON -->
+        <Button Grid.Row="1"
+            Content="Button"
+            Width="140"
+            Height="28"
+            HorizontalAlignment="Right"
+            Margin="0,10,0,0" Click="Button_Click"/>
     </Grid>
 </Window>

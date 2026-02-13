@@ -1,0 +1,35 @@
+﻿<Window x:Class="DocuManager.RemoveDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RemoveDialog"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow">
+    <StackPanel Margin="20" Width="320">
+
+        <TextBlock Text="Remove this item from the list?"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,8"/>
+
+        <TextBlock Text="This will NOT delete the file from your computer."
+                   TextWrapping="Wrap"
+                   Foreground="#555"
+                   Margin="0,0,0,16"/>
+
+        <CheckBox x:Name="DontShowAgainCheckBox"
+                  Content="Don’t show this again"
+                  Margin="0,0,0,16"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancel"
+                    Width="75"
+                    Margin="0,0,8,0"
+                    IsCancel="True"/>
+            <Button Content="Remove"
+                    Width="75"
+                    IsDefault="True"
+                    Click="Remove_Click"/>
+        </StackPanel>
+
+    </StackPanel>
+</Window>
