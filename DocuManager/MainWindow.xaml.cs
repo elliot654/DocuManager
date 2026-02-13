@@ -26,6 +26,7 @@ namespace DocuManager
         private GridViewColumnHeader _lastHeaderClicked;
         private ListSortDirection _lastDirection;
         private Point _dragStartPoint;
+        private Dictionary<string, FileSystemWatcher> _watchers = new();
         ObservableCollection<Record> records = new ObservableCollection<Record>();
         XmlSerializer serializer = new XmlSerializer(typeof(ObservableCollection<Record>));
         public MainWindow()
@@ -40,6 +41,10 @@ namespace DocuManager
                 }
             }
             ItemsList.ItemsSource = records;
+            foreach (var record in records)
+            {
+                WatchFile(record.FilePath);
+            }
             records.CollectionChanged += (_, __) => UpdateHint();
             UpdateHint();
             
@@ -273,7 +278,124 @@ namespace DocuManager
             int words = Regex.Matches(plainText, @"\b\w+\b").Count;
 
             Guid id = Guid.NewGuid();
-            records.Add(new Record(id, filename, characters, words, paragraphs, extension));
+            records.Add(new Record(id, filename, characters, words, paragraphs, extension, filePath));
+            WatchFile(filePath);
+        }
+        private void WatchFile(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+                return;
+
+            if (_watchers.ContainsKey(filePath))
+                return;
+
+            string directory = Path.GetDirectoryName(filePath);
+            string fileName = Path.GetFileName(filePath);
+
+            FileSystemWatcher watcher = new FileSystemWatcher(directory, fileName)
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size
+            };
+
+            watcher.Changed += OnFileChanged;
+            watcher.EnableRaisingEvents = true;
+
+            _watchers[filePath] = watcher;
+        }
+
+        private async void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            // Give file a tiny delay to make sure it's not locked
+            await Task.Delay(50);
+
+            Dispatcher.Invoke(() =>
+            {
+                var record = records.FirstOrDefault(r => string.Equals(r.FilePath, e.FullPath, StringComparison.InvariantCultureIgnoreCase));
+                if (record != null)
+                {
+                    try
+                    {
+                        UpdateRecordStats(record);
+                    }
+                    catch
+                    {
+                        // Ignore temporary file locks
+                    }
+                }
+            });
+        }
+        private void UpdateRecordStats(Record record)
+        {
+            string filePath = record.FilePath;
+            string extension = record.Extension.ToLowerInvariant();
+
+            string plainText = null;
+            int paragraphs = 0;
+
+            if (extension == ".txt" || extension == ".rtf")
+            {
+                string text = File.ReadAllText(filePath);
+
+                paragraphs = Regex
+                    .Split(text.Trim(), @"(\r?\n\s*\r?\n)+")
+                    .Count(p => !string.IsNullOrWhiteSpace(p));
+
+                // Use RichTextBox to normalize RTF → plain text
+                RichTextBox richTextBox = new RichTextBox();
+                TextRange range = new TextRange(
+                    richTextBox.Document.ContentStart,
+                    richTextBox.Document.ContentEnd);
+
+                using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(text)))
+                {
+                    range.Load(stream, DataFormats.Rtf);
+                }
+
+                plainText = range.Text;
+            }
+            else if (extension == ".docx")
+            {
+                using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(filePath, false))
+                {
+                    StringBuilder sb = new StringBuilder();
+                    Body body = wordDoc.MainDocumentPart.Document.Body;
+
+                    foreach (var para in body.Elements<Paragraph>())
+                    {
+                        sb.AppendLine(para.InnerText);
+                        paragraphs++;
+                    }
+
+                    plainText = sb.ToString();
+                }
+            }
+            else if (extension == ".odt")
+            {
+                using (ZipArchive archive = ZipFile.OpenRead(filePath))
+                {
+                    ZipArchiveEntry entry = archive.GetEntry("content.xml");
+                    using StreamReader reader = new StreamReader(entry.Open());
+
+                    var xml = XDocument.Parse(reader.ReadToEnd());
+                    XNamespace textNs = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var para in xml.Descendants(textNs + "p"))
+                    {
+                        sb.AppendLine(para.Value);
+                        paragraphs++;
+                    }
+
+                    plainText = sb.ToString();
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(plainText))
+                return;
+
+            record.Characters = plainText.Length;
+            record.Words = Regex.Matches(plainText, @"\b\w+\b").Count;
+            record.Paragraphs = paragraphs;
         }
     }
 }
