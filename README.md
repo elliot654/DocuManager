@@ -42,6 +42,8 @@ ex. Elliot Sheehy
 
 ## Version History
 
+* 0.3
+    * counts update when files are modified 
 * 0.2
     * List order can be changed
     * dialogue for clarity about removing items
