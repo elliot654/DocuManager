@@ -25,14 +25,9 @@ This project was developed as a complete, standalone tool for a real user workfl
 2. Open the solution file in Visual Studio
 3. Build the project
 
-### Executing Program
-1. Open the solution in Visual Studio
-2. Press **F5** to build and run  
-   or  
-3. Run the generated executable from the build output folder
-
 ## Screenshots
-(Add screenshots here)
+<img width="887" height="495" alt="{EAE8EA37-77C0-4FBE-8600-F56C000788C2}" src="https://github.com/user-attachments/assets/ad970ca2-126a-4679-b826-c794e4d819a3" />
+<img width="883" height="494" alt="{AFC8264A-890F-4969-AFDA-85CFFA99124A}" src="https://github.com/user-attachments/assets/134d5f98-0427-4f1d-bd44-88b3a42dce8c" />
 
 ## Authors
 
